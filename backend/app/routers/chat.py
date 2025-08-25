@@ -26,6 +26,7 @@ class SendMessageRequest(BaseModel):
     note_content: str
     provider_id: str
     model_name: str
+    task_id: Optional[str] = None
 
 
 class ChatMessage(BaseModel):
@@ -64,7 +65,8 @@ def send_message(request: SendMessageRequest):
             message=request.message,
             note_content=request.note_content,
             provider_id=request.provider_id,
-            model_name=request.model_name
+            model_name=request.model_name,
+            task_id=request.task_id
         )
         
         return R.success(

@@ -61,7 +61,7 @@ const TranscriptViewer = () => {
                 <div>时间</div>
                 <div>内容</div>
               </div>
-            <ScrollArea className="w-full overflow-y-auto">
+            <ScrollArea className="w-full h-full overflow-y-auto">
 
               <div className="space-y-1">
                 {task.transcript.segments.map((segment, index) => (

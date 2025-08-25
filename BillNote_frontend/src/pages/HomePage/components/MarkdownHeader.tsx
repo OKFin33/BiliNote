@@ -1,33 +1,31 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Copy, Download, BrainCircuit } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Badge } from '@/components/ui/badge'
-
-interface VersionNote {
-  ver_id: string
-  model_name?: string
-  style?: string
-  created_at?: string
-}
+import { FC } from 'react'
+import { Button } from '@/components/ui/button.tsx'
+import { Badge } from '@/components/ui/badge.tsx'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip.tsx'
+import { BrainCircuit, Copy, Download, MessageCircle, FileText } from 'lucide-react'
+import { noteStyles } from '@/constant/note.ts'
+import { formatDate } from '@/lib/utils.ts'
 
 interface NoteHeaderProps {
-  currentTask?: {
-    markdown: VersionNote[] | string
-  }
+  currentTask: any
   isMultiVersion: boolean
   currentVerId: string
   setCurrentVerId: (id: string) => void
   modelName: string
   style: string
-  noteStyles: { value: string; label: string }[]
+  noteStyles: any
   onCopy: () => void
   onDownload: () => void
-  createAt?: string | Date
+  createAt: string
+  showTranscribe: boolean
   setShowTranscribe: (show: boolean) => void
+  viewMode: 'map' | 'preview'
+  setViewMode: (mode: 'map' | 'preview') => void
+  showChat?: boolean
+  setShowChat?: (show: boolean) => void
 }
 
 export function MarkdownHeader({
@@ -45,42 +43,10 @@ export function MarkdownHeader({
   setShowTranscribe,
   viewMode,
   setViewMode,
+  showChat = false,
+  setShowChat = () => {},
 }: NoteHeaderProps) {
-  const [copied, setCopied] = useState(false)
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout
-    if (copied) {
-      timer = setTimeout(() => setCopied(false), 2000)
-    }
-    return () => clearTimeout(timer)
-  }, [copied])
-
-  const handleCopy = () => {
-    onCopy()
-    setCopied(true)
-  }
-
-  const styleName = noteStyles.find(v => v.value === style)?.label || style
-
-  const reversedMarkdown: VersionNote[] = Array.isArray(currentTask?.markdown)
-    ? [...currentTask!.markdown].reverse()
-    : []
-
-  const formatDate = (date: string | Date | undefined) => {
-    if (!date) return ''
-    const d = typeof date === 'string' ? new Date(date) : date
-    if (isNaN(d.getTime())) return ''
-    return d
-      .toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-      .replace(/\//g, '-')
-  }
+  const styleName = noteStyles.find((s: any) => s.value === style)?.label || style
 
   return (
     <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b bg-white/95 px-4 py-2 backdrop-blur-sm">
@@ -145,9 +111,9 @@ export function MarkdownHeader({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button onClick={handleCopy} variant="ghost" size="sm" className="h-8 px-2">
+              <Button onClick={onCopy} variant="ghost" size="sm" className="h-8 px-2">
                 <Copy className="mr-1.5 h-4 w-4" />
-                <span className="text-sm">{copied ? '已复制' : '复制'}</span>
+                <span className="text-sm">复制</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>复制内容</TooltipContent>
@@ -165,6 +131,7 @@ export function MarkdownHeader({
             <TooltipContent>下载为 Markdown 文件</TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -172,15 +139,34 @@ export function MarkdownHeader({
                 onClick={() => {
                   setShowTranscribe(!showTranscribe)
                 }}
-                variant="ghost"
+                variant={showTranscribe ? "default" : "ghost"}
                 size="sm"
                 className="h-8 px-2"
               >
-                {/*<Download className="mr-1.5 h-4 w-4" />*/}
+                <FileText className="mr-1.5 h-4 w-4" />
                 <span className="text-sm">原文参照</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>原文参照</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => {
+                  setShowChat(!showChat)
+                }}
+                variant={showChat ? "default" : "ghost"}
+                size="sm"
+                className="h-8 px-2"
+              >
+                <MessageCircle className="mr-1.5 h-4 w-4" />
+                <span className="text-sm">与AI讨论</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>与AI讨论笔记内容</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>

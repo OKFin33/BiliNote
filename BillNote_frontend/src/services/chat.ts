@@ -18,6 +18,7 @@ export interface SendMessageRequest {
   note_content: string
   provider_id: string
   model_name: string
+  task_id?: string
 }
 
 export interface CreateSessionRequest {
